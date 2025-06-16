@@ -4,6 +4,7 @@ import Header from '../components/header';
 import Navigation from '../components/navigation';
 import User from '../pages/User';
 import Report from '../pages/Report';
+import Article from '../pages/Article';
 
 const AppRoutes = () => {
     return (
@@ -24,7 +25,7 @@ const AppRoutes = () => {
                         <Route path="/report" element={<Report />} />
                     </Routes>
                     <Routes>
-                        <Route path="/article" element={<Report />} />
+                        <Route path="/article" element={<Article />} />
                     </Routes>
                 </div>
             </div>
