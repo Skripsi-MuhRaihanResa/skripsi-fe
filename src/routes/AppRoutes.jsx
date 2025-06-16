@@ -1,19 +1,25 @@
-import { Routes, Route } from 'react-router'
-import Dashboard from '../pages/dashboard'
+import { Routes, Route } from 'react-router';
+import Dashboard from '../pages/dashboard';
+import Header from '../components/header';
+import Navigation from '../components/navigation';
+import User from '../pages/User';
 
 const AppRoutes = () => {
     return (
-        <div>
-            <Routes>
-                <Route path="" element={
-                    <>
-                        <Dashboard />
-                    </>
-                }
-                />
-            </Routes>
-        </div>
-    )
-}
+        <div className="flex flex-col h-screen">
+            <Header />
 
-export default AppRoutes
+            <div className="flex flex-1">
+                <Navigation />
+
+                <div className="flex-1 overflow-auto p-6 bg-gray-50">
+                    <Routes>
+                        <Route path="/" element={<User />} />
+                    </Routes>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default AppRoutes;
