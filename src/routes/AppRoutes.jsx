@@ -1,35 +1,66 @@
-import { Routes, Route } from 'react-router';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Dashboard from '../pages/dashboard';
 import Header from '../components/header';
 import Navigation from '../components/navigation';
 import User from '../pages/User';
 import Report from '../pages/Report';
 import Article from '../pages/Article';
+import Login from '../pages/login';
+import NotFound from '../pages/NotFound';
+
+const Layout = ({ children }) => (
+    <div className="flex flex-col h-screen">
+        <Header />
+        <div className="flex flex-1">
+            <Navigation />
+            <div className="flex-1 overflow-auto p-6 bg-gray-50">{children}</div>
+        </div>
+    </div>
+);
 
 const AppRoutes = () => {
+    const location = useLocation();
+
     return (
-        <div className="flex flex-col h-screen">
-            <Header />
+        <Routes>
+            {/* No Layout */}
+            <Route path="/login" element={<Login />} />
+            <Route path="*" element={<NotFound />} />
 
-            <div className="flex flex-1">
-                <Navigation />
-
-                <div className="flex-1 overflow-auto p-6 bg-gray-50">
-                    <Routes>
-                        <Route path="/" element={<Dashboard />} />
-                    </Routes>
-                    <Routes>
-                        <Route path="/user" element={<User />} />
-                    </Routes>
-                    <Routes>
-                        <Route path="/report" element={<Report />} />
-                    </Routes>
-                    <Routes>
-                        <Route path="/article" element={<Article />} />
-                    </Routes>
-                </div>
-            </div>
-        </div>
+            {/* With Layout */}
+            <Route
+                path="/"
+                element={
+                    <Layout>
+                        <Dashboard />
+                    </Layout>
+                }
+            />
+            <Route
+                path="/user"
+                element={
+                    <Layout>
+                        <User />
+                    </Layout>
+                }
+            />
+            <Route
+                path="/report"
+                element={
+                    <Layout>
+                        <Report />
+                    </Layout>
+                }
+            />
+            <Route
+                path="/article"
+                element={
+                    <Layout>
+                        <Article />
+                    </Layout>
+                }
+            />
+        </Routes>
     );
 };
 
