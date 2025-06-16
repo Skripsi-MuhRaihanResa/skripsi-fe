@@ -7,6 +7,7 @@ import {
   faSignOutAlt,
 } from '@fortawesome/free-solid-svg-icons';
 import { Link, useLocation } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const Navigation = () => {
   const location = useLocation();
@@ -16,6 +17,23 @@ const Navigation = () => {
     { id: 'report', icon: faFileAlt, label: 'Report', path: '/report' },
     { id: 'article', icon: faTh, label: 'Article', path: '/article' },
   ];
+
+  const handleLogout = () => {
+    Swal.fire({
+      title: 'Konfirmasi Logout',
+      text: 'Apakah Anda yakin ingin keluar dari akun?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#aaa',
+      confirmButtonText: 'Ya, Logout',
+      cancelButtonText: 'Batal',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        alert("Logout Berhasil");
+      }
+    });
+  };
 
   return (
     <nav className="w-20 bg-gray-50 h-full flex flex-col justify-between items-center py-6 border-r border-gray-200">
@@ -42,6 +60,7 @@ const Navigation = () => {
       </div>
 
       <button
+        onClick={handleLogout}
         className="w-14 h-14 rounded-xl flex flex-col items-center justify-center transition-all duration-200 text-gray-400 hover:text-red-500 hover:bg-white hover:shadow-md"
         title="Logout"
         aria-label="Logout"

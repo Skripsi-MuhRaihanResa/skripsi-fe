@@ -22,7 +22,6 @@ const Article = () => {
     return (
         <div className="flex-1 p-8">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                {/* Header */}
                 <div className="px-6 py-4 border-b border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
@@ -46,7 +45,6 @@ const Article = () => {
                     </div>
                 </div>
 
-                {/* Table */}
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50">
@@ -87,8 +85,7 @@ const Article = () => {
                     </table>
                 </div>
 
-                {/* Pagination */}
-                <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end">
+                <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-center">
                     <div className="flex items-center space-x-2">
                         <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-150">
                             <FontAwesomeIcon icon={faChevronLeft} />
