@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router';
 import Dashboard from '../pages/dashboard';
 import Header from '../components/header';
 import Navigation from '../components/navigation';
+import User from '../pages/User';
 
 const AppRoutes = () => {
     return (
@@ -13,7 +14,7 @@ const AppRoutes = () => {
 
                 <div className="flex-1 overflow-auto p-6 bg-gray-50">
                     <Routes>
-                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/" element={<User />} />
                     </Routes>
                 </div>
             </div>
