@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router'
 import Dashboard from '../pages/dashboard'
+import Header from '../components/header'
 
 const AppRoutes = () => {
     return (
@@ -7,6 +8,7 @@ const AppRoutes = () => {
             <Routes>
                 <Route path="" element={
                     <>
+                        <Header />
                         <Dashboard />
                     </>
                 }
