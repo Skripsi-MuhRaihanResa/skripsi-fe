@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import { React, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faEnvelope,
@@ -9,7 +12,39 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 const Login = () => {
+    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
+
+    const [input, setInput] = useState({
+        username: "",
+        password: ""
+    });
+
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setInput({ ...input, [name]: value });
+    };
+
+    const handleLogin = (event) => {
+        event.preventDefault();
+        setLoading(true);
+
+        let { email, password } = input;
+        axios.post(`https://troto.aninyan.com/login`, { email, password })
+            .then((res) => {
+                let token = res.data.data.token;
+
+                Cookies.set('token', token, { expires: 1 });
+                navigate('/');
+            })
+            .catch((error) => {
+                console.error("Error :", error);
+
+                setLoading(false)
+            });
+    };
+
+    const [loading, setLoading] = useState(false);
 
     return (
         <>
@@ -30,7 +65,7 @@ const Login = () => {
                     </div>
 
                     <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-                        <div className="space-y-6">
+                        <form className="space-y-6" onSubmit={handleLogin}>
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                                     Email Address
@@ -42,6 +77,8 @@ const Login = () => {
                                     <input
                                         type="email"
                                         name="email"
+                                        value={input.email}
+                                        onChange={handleChange}
                                         className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
                                         placeholder="Enter your email"
                                         required
@@ -61,6 +98,8 @@ const Login = () => {
                                     <input
                                         type={showPassword ? 'text' : 'password'}
                                         name="password"
+                                        value={input.password}
+                                        onChange={handleChange}
                                         className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
                                         placeholder="Enter your password"
                                         required
@@ -78,12 +117,24 @@ const Login = () => {
                             <button
                                 className={`w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-200 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5`}
                             >
-                                <div className="flex items-center justify-center">
+                                <div
+                                    type='submit'
+                                    className="flex items-center justify-center"
+                                    disabled={loading}
+                                >
                                     <FontAwesomeIcon icon={faSignInAlt} className="mr-2" />
                                     Login
                                 </div>
                             </button>
-                        </div>
+
+                            {loading && (
+                                <div className="flex justify-center items-center mt-10">
+                                    <div className="relative w-12 h-12">
+                                        <div className="absolute inset-0 border-4 border-[#FFC100] border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                </div>
+                            )}
+                        </form>
                     </div>
 
                     <div className="mt-8 text-center">
