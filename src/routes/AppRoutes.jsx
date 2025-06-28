@@ -1,4 +1,7 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import Cookies from 'js-cookie';
+
 import Dashboard from '../pages/dashboard';
 import Header from '../components/header';
 import Navigation from '../components/navigation';
@@ -20,6 +23,19 @@ const Layout = ({ children }) => (
 
 const AppRoutes = () => {
     const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = Cookies.get('token');
+
+        if (!token && location.pathname !== '/login') {
+            navigate('/login');
+        }
+
+        if (token && location.pathname === '/login') {
+            navigate('/');
+        }
+    }, [location, navigate]);
 
     return (
         <Routes>
