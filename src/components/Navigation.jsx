@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUser,
@@ -6,11 +5,13 @@ import {
   faTh,
   faSignOutAlt,
 } from '@fortawesome/free-solid-svg-icons';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import Cookies from 'js-cookie';
 
 const Navigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navItems = [
     { id: 'user', icon: faUser, label: 'User', path: '/user' },
@@ -30,7 +31,9 @@ const Navigation = () => {
       cancelButtonText: 'Batal',
     }).then((result) => {
       if (result.isConfirmed) {
-        alert("Logout Berhasil");
+        Cookies.remove('token');
+
+        navigate('/login');
       }
     });
   };
