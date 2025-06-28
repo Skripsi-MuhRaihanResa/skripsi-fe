@@ -2,6 +2,7 @@ import { React, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faEnvelope,
@@ -10,6 +11,8 @@ import {
     faEyeSlash,
     faSignInAlt,
 } from '@fortawesome/free-solid-svg-icons';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -32,13 +35,39 @@ const Login = () => {
         let { email, password } = input;
         axios.post(`https://troto.aninyan.com/login`, { email, password })
             .then((res) => {
-                let token = res.data.data.token;
+                toast.success(res.message, {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: true,
+                });
 
-                Cookies.set('token', token, { expires: 1 });
-                navigate('/');
+                setTimeout(() => {
+                    let token = res.data.data.token;
+
+                    const decoded = jwtDecode(token);
+
+                    if (decoded.role !== 'admin') {
+                        toast.error('Akses hanya untuk admin', {
+                            position: "top-center",
+                            autoClose: 3000,
+                            hideProgressBar: true,
+                        });
+                        setLoading(false)
+
+                        return;
+                    }
+
+                    Cookies.set('token', token, { expires: 1 });
+                    navigate('/');
+                }, 3000);
             })
             .catch((error) => {
                 console.error("Error :", error);
+                toast.error(error.response.data.message, {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: true,
+                });
 
                 setLoading(false)
             });
@@ -128,7 +157,7 @@ const Login = () => {
                             </button>
 
                             {loading && (
-                                <div className="flex justify-center items-center mt-10">
+                                <div className="flex justify-center items-center mt-4">
                                     <div className="relative w-12 h-12">
                                         <div className="absolute inset-0 border-4 border-[#FFC100] border-t-transparent rounded-full animate-spin"></div>
                                     </div>
@@ -143,6 +172,10 @@ const Login = () => {
                         </p>
                     </div>
                 </div>
+
+                <ToastContainer
+                    className="absolute top-5 right-5"
+                />
             </div>
         </>
     );
