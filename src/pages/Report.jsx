@@ -26,6 +26,7 @@ const Report = () => {
     const [pagination, setPagination] = useState({
         current_page: 1,
         last_page: 1,
+        total_data: 0
     });
 
     const fetchData = (page = 1, searchTerm = '') => {
@@ -86,11 +87,11 @@ const Report = () => {
                             autoClose: 3000,
                             hideProgressBar: true,
                         });
-                        window.location.reload();
+                        fetchData();
                     })
                     .catch((error) => {
                         console.error("Error:", error);
-                        toast.error(error.response?.data?.message || "Terjadi kesalahan", {
+                        toast.error(error.response?.data?.message || "error", {
                             position: "top-center",
                             autoClose: 3000,
                             hideProgressBar: true,
@@ -102,8 +103,8 @@ const Report = () => {
 
     const handleDeleteReport = (id) => {
         Swal.fire({
-            title: 'Yakin ingin menghapus laporan ini?',
-            text: "Tindakan ini tidak dapat dibatalkan.",
+            title: 'Konfirmasi Hapus Report',
+            text: "Apakah Anda yakin ingin menghapus report ini?",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Ya, Hapus',
@@ -123,7 +124,7 @@ const Report = () => {
                             hideProgressBar: true,
                         });
 
-                        window.location.reload();
+                        fetchData();
                     })
                     .catch((error) => {
                         console.error("Gagal hapus:", error);
@@ -143,13 +144,13 @@ const Report = () => {
 
     const handlePrev = () => {
         if (pagination.current_page > 1) {
-            fetchData(pagination.current_page - 1, search);
+            fetchData(pagination.current_page - 1, reportsSearch);
         }
     };
 
     const handleNext = () => {
         if (pagination.current_page < pagination.last_page) {
-            fetchData(pagination.current_page + 1, search);
+            fetchData(pagination.current_page + 1, reportsSearch);
         }
     };
 
