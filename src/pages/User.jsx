@@ -49,7 +49,7 @@ const User = () => {
     const handleDelete = (usersId) => {
         Swal.fire({
             title: 'Konfirmasi Hapus User',
-            text: 'Apakah Anda yakin ingin menghapus user?',
+            text: 'Apakah Anda yakin ingin menghapus user ini?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -169,12 +169,6 @@ const User = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{user.email}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div className="flex space-x-3">
-                                            {/* <button
-                                                className="p-2 bg-orange-100 text-orange-600 hover:bg-orange-200 rounded-lg transition"
-                                                title="Edit"
-                                            >
-                                                <FontAwesomeIcon icon={faPen} />
-                                            </button> */}
                                             <button
                                                 className="p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg transition"
                                                 title="Delete"

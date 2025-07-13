@@ -87,7 +87,7 @@ const Report = () => {
                             autoClose: 3000,
                             hideProgressBar: true,
                         });
-                        window.location.reload();
+                        fetchData();
                     })
                     .catch((error) => {
                         console.error("Error:", error);
@@ -103,8 +103,8 @@ const Report = () => {
 
     const handleDeleteReport = (id) => {
         Swal.fire({
-            title: 'Yakin ingin menghapus laporan ini?',
-            text: "Tindakan ini tidak dapat dibatalkan.",
+            title: 'Konfirmasi Hapus Report',
+            text: "Apakah Anda yakin ingin menghapus report ini?",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Ya, Hapus',
@@ -124,7 +124,7 @@ const Report = () => {
                             hideProgressBar: true,
                         });
 
-                        window.location.reload();
+                        fetchData();
                     })
                     .catch((error) => {
                         console.error("Gagal hapus:", error);

@@ -108,6 +108,38 @@ const Article = () => {
             });
     };
 
+    const handleDelete = (id) => {
+        Swal.fire({
+            title: 'Konfirmasi Hapus Article',
+            text: 'Apakah Anda yakin ingin menghapus article ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#aaa',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const token = Cookies.get('token');
+                axios
+                    .delete(`https://troto.aninyan.com/articles/${id}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    })
+                    .then(() => {
+                        toast.success('Artikel berhasil dihapus!', { autoClose: 3000 });
+                        fetchData();
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        toast.error(error.response?.data?.message || 'Gagal menghapus artikel', {
+                            autoClose: 3000,
+                        });
+                    });
+            }
+        });
+    };
 
     useEffect(() => {
         fetchData();
@@ -177,14 +209,9 @@ const Article = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div className="flex space-x-2">
                                             <button
-                                                className="p-2 bg-orange-100 text-orange-600 hover:bg-orange-200 rounded-lg transition"
-                                                title="Edit"
-                                            >
-                                                <FontAwesomeIcon icon={faEdit} />
-                                            </button>
-                                            <button
                                                 className="p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg transition"
                                                 title="Hapus"
+                                                onClick={() => handleDelete(article.id)}
                                             >
                                                 <FontAwesomeIcon icon={faTrash} />
                                             </button>
