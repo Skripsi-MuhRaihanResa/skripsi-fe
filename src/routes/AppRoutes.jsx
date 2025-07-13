@@ -7,6 +7,7 @@ import Header from '../components/header';
 import Navigation from '../components/navigation';
 import User from '../pages/User';
 import Report from '../pages/Report';
+import ReportDetail from '../pages/ReportDetail';
 import Article from '../pages/Article';
 import Login from '../pages/login';
 import NotFound from '../pages/NotFound';
@@ -65,6 +66,14 @@ const AppRoutes = () => {
                 element={
                     <Layout>
                         <Report />
+                    </Layout>
+                }
+            />
+            <Route
+                path="/reports/:id"
+                element={
+                    <Layout>
+                        <ReportDetail />
                     </Layout>
                 }
             />
