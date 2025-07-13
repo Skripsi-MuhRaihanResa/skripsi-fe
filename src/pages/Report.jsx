@@ -12,6 +12,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import Loading from '../components/Loading';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -50,6 +51,52 @@ const Report = () => {
             .finally(() => {
                 setLoading(false);
             });
+    };
+
+    const handleUpdateStatus = (id, newStatus) => {
+        Swal.fire({
+            title: `Ubah status menjadi ${newStatus}`,
+            input: 'text',
+            inputLabel: 'Alasan perubahan status',
+            inputPlaceholder: 'Masukkan alasan di sini...',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Alasan wajib diisi';
+                }
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Kirim',
+            cancelButtonText: 'Batal',
+            icon: 'question',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const reason = result.value;
+                const token = Cookies.get("token");
+
+                axios.patch(`https://troto.aninyan.com/reports/${id}/status`, {
+                    status: newStatus,
+                    reason: reason,
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                    .then((res) => {
+                        toast.success(res.data?.message || "Update status berhasil", {
+                            position: "top-center",
+                            autoClose: 3000,
+                            hideProgressBar: true,
+                        });
+                        window.location.reload();
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                        toast.error(error.response?.data?.message || "Terjadi kesalahan", {
+                            position: "top-center",
+                            autoClose: 3000,
+                            hideProgressBar: true,
+                        });
+                    });
+            }
+        });
     };
 
     useEffect(() => {
@@ -128,8 +175,8 @@ const Report = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`text-sm font-medium px-2 py-1 rounded-full
-                                            ${report.status === 'Disetujui' && 'bg-green-100 text-green-600'}
-                                            ${report.status === 'Ditolak' && 'bg-red-100 text-red-600'}
+                                            ${report.status === 'Approved' && 'bg-green-100 text-green-600'}
+                                            ${report.status === 'Rejected' && 'bg-red-100 text-red-600'}
                                             ${report.status === 'Pending' && 'bg-yellow-100 text-yellow-600'}`}>
                                             {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
                                         </span>
@@ -138,12 +185,22 @@ const Report = () => {
                                         <div className="flex space-x-2">
                                             {report.status === 'Pending' && (
                                                 <>
-                                                    <button className="p-2 bg-green-100 text-green-600 hover:bg-green-200 rounded-lg transition" title="Setujui">
+                                                    <button
+                                                        className="p-2 bg-green-100 text-green-600 hover:bg-green-200 rounded-lg transition"
+                                                        title="Setujui"
+                                                        onClick={() => handleUpdateStatus(report.id, "approved")}
+                                                    >
                                                         <FontAwesomeIcon icon={faCheck} />
                                                     </button>
-                                                    <button className="p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg transition" title="Tolak">
+
+                                                    <button
+                                                        className="p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg transition"
+                                                        title="Tolak"
+                                                        onClick={() => handleUpdateStatus(report.id, "rejected")}
+                                                    >
                                                         <FontAwesomeIcon icon={faTimes} />
                                                     </button>
+
                                                 </>
                                             )}
                                             <button
