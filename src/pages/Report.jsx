@@ -6,7 +6,8 @@ import {
     faTimes,
     faSearch,
     faChevronLeft,
-    faChevronRight
+    faChevronRight,
+    faTrash
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import Cookies from 'js-cookie';
@@ -90,6 +91,43 @@ const Report = () => {
                     .catch((error) => {
                         console.error("Error:", error);
                         toast.error(error.response?.data?.message || "Terjadi kesalahan", {
+                            position: "top-center",
+                            autoClose: 3000,
+                            hideProgressBar: true,
+                        });
+                    });
+            }
+        });
+    };
+
+    const handleDeleteReport = (id) => {
+        Swal.fire({
+            title: 'Yakin ingin menghapus laporan ini?',
+            text: "Tindakan ini tidak dapat dibatalkan.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#d33',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const token = Cookies.get("token");
+
+                axios.delete(`https://troto.aninyan.com/reports/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                    .then((res) => {
+                        toast.success(res.data?.message || "Laporan berhasil dihapus", {
+                            position: "top-center",
+                            autoClose: 3000,
+                            hideProgressBar: true,
+                        });
+
+                        window.location.reload();
+                    })
+                    .catch((error) => {
+                        console.error("Gagal hapus:", error);
+                        toast.error(error.response?.data?.message || "Gagal menghapus laporan", {
                             position: "top-center",
                             autoClose: 3000,
                             hideProgressBar: true,
@@ -209,6 +247,13 @@ const Report = () => {
                                                 title="Lihat Detail"
                                             >
                                                 <FontAwesomeIcon icon={faEye} />
+                                            </button>
+                                            <button
+                                                className="p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg transition"
+                                                title="Hapus Laporan"
+                                                onClick={() => handleDeleteReport(report.id)}
+                                            >
+                                                <FontAwesomeIcon icon={faTrash} />
                                             </button>
                                         </div>
                                     </td>
