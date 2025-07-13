@@ -1,13 +1,66 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faChevronLeft, faChevronRight, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
+import Loading from '../components/Loading';
+import Cookies from 'js-cookie';
 
 const User = () => {
-    const users = [
-        { id: 1, name: 'John Doe', username: 'johndoe', email: 'john@example.com' },
-        { id: 2, name: 'Jane Smith', username: 'janesmith', email: 'jane@example.com' },
-        { id: 3, name: 'Michael Johnson', username: 'mjohnson', email: 'michael@example.com' },
-    ];
+    const [loading, setLoading] = useState(true);
+    const [usersSearch, setUsersSearch] = useState('');
+    const [users, setUsers] = useState([]);
+
+    const [usersPagination, setUsersPagination] = useState({
+        current_page: 1,
+        last_page: 1,
+        total_data: 0
+    });
+
+    const fetchData = (page = 1, search = '') => {
+        setLoading(true);
+        const token = Cookies.get('token');
+
+        axios
+            .get(`https://troto.aninyan.com/users?page=${page}&search=${search}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then((res) => {
+                setUsers(res.data.data);
+                setUsersPagination(res.data.pagination);
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                toast.error(error.response?.data?.message || "error", {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: true,
+                });
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const handlePrevPage = () => {
+        if (usersPagination.current_page > 1) {
+            fetchData(usersPagination.current_page - 1, usersSearch);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (usersPagination.current_page < usersPagination.last_page) {
+            fetchData(usersPagination.current_page + 1, usersSearch);
+        }
+    };
+
+    if (loading) return <Loading />;
 
     return (
         <div className="flex-1 p-8">
@@ -22,6 +75,13 @@ const User = () => {
                             <input
                                 type="text"
                                 placeholder="Cari pengguna..."
+                                value={usersSearch}
+                                onChange={(e) => setUsersSearch(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        fetchData(1, usersSearch);
+                                    }
+                                }}
                                 className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 w-80"
                             />
                         </div>
@@ -45,7 +105,7 @@ const User = () => {
                                         <div className="flex items-center">
                                             <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center">
                                                 <span className="text-white text-sm font-medium">
-                                                    {user.name.split(' ').map(n => n[0]).join('')}
+                                                    {user.name?.split(' ').map(n => n[0]).join('')}
                                                 </span>
                                             </div>
                                             <div className="ml-4">
@@ -57,15 +117,15 @@ const User = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{user.email}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div className="flex space-x-3">
-                                            <button
+                                            {/* <button
                                                 className="p-2 bg-orange-100 text-orange-600 hover:bg-orange-200 rounded-lg transition"
                                                 title="Edit"
                                             >
                                                 <FontAwesomeIcon icon={faPen} />
-                                            </button>
+                                            </button> */}
                                             <button
                                                 className="p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg transition"
-                                                title="Hapus"
+                                                title="Delete"
                                             >
                                                 <FontAwesomeIcon icon={faTrash} />
                                             </button>
@@ -79,11 +139,21 @@ const User = () => {
 
                 <div className="px-6 py-4 border-t border-gray-100 flex justify-center">
                     <div className="flex items-center space-x-2">
-                        <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <button
+                            onClick={handlePrevPage}
+                            disabled={usersPagination.current_page === 1}
+                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50"
+                        >
                             <FontAwesomeIcon icon={faChevronLeft} />
                         </button>
-                        <span className="px-3 py-1 bg-orange-500 text-white rounded-lg text-sm font-medium">1</span>
-                        <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <span className="px-3 py-1 bg-orange-500 text-white rounded-lg text-sm font-medium">
+                            {usersPagination.current_page}
+                        </span>
+                        <button
+                            onClick={handleNextPage}
+                            disabled={usersPagination.current_page === usersPagination.last_page}
+                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50"
+                        >
                             <FontAwesomeIcon icon={faChevronRight} />
                         </button>
                     </div>
