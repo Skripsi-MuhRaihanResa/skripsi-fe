@@ -5,6 +5,7 @@ import { faSearch, faChevronLeft, faChevronRight, faPen, faTrash } from '@fortaw
 import { toast } from 'react-toastify';
 import Loading from '../components/Loading';
 import Cookies from 'js-cookie';
+import Swal from 'sweetalert2';
 
 const User = () => {
     const [loading, setLoading] = useState(true);
@@ -42,6 +43,56 @@ const User = () => {
             .finally(() => {
                 setLoading(false);
             });
+    };
+
+    const handleDelete = (usersId) => {
+        Swal.fire({
+            title: 'Konfirmasi Hapus User',
+            text: 'Apakah Anda yakin ingin menghapus user?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#aaa',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const token = Cookies.get('token');
+
+                axios
+                    .delete(`https://troto.aninyan.com/users/${usersId}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                    .then((response) => {
+                        toast.success(
+                            response.data.message || 'Hapus user berhasil',
+                            {
+                                position: 'top-center',
+                                autoClose: 3000,
+                                hideProgressBar: true,
+                            }
+                        );
+
+                        setTimeout(() => {
+                            fetchData(usersPagination.current_page, usersSearch);
+                        }, 1000);
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        toast.error(
+                            error.response?.data?.message || 'error',
+                            {
+                                position: 'top-center',
+                                autoClose: 3000,
+                                hideProgressBar: true,
+                            }
+                        );
+                    });
+            }
+        });
     };
 
     useEffect(() => {
@@ -126,6 +177,7 @@ const User = () => {
                                             <button
                                                 className="p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg transition"
                                                 title="Delete"
+                                                onClick={() => handleDelete(user.id)}
                                             >
                                                 <FontAwesomeIcon icon={faTrash} />
                                             </button>
