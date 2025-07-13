@@ -19,12 +19,36 @@ import 'react-toastify/dist/ReactToastify.css';
 const Article = () => {
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingSubmit, setLoadingSubmit] = useState(false);
     const [articlesSearch, setArticlesSearch] = useState('');
     const [pagination, setPagination] = useState({
         current_page: 1,
         last_page: 1,
         total_data: 0
     });
+
+    const [showModal, setShowModal] = useState(false);
+    const [formData, setFormData] = useState({
+        title: '',
+        description: '',
+        image: null,
+    });
+
+    const handleChange = (e) => {
+        const { name, value, files } = e.target;
+
+        if (name === 'image') {
+            setFormData((prev) => ({
+                ...prev,
+                image: files[0],
+            }));
+        } else {
+            setFormData((prev) => ({
+                ...prev,
+                [name]: value,
+            }));
+        }
+    };
 
     const fetchData = (page = 1, search = '') => {
         setLoading(true);
@@ -53,6 +77,38 @@ const Article = () => {
             });
     };
 
+    const handleSubmit = () => {
+        const token = Cookies.get('token');
+        setLoadingSubmit(true);
+        const payload = new FormData();
+        payload.append('title', formData.title);
+        payload.append('description', formData.description);
+        payload.append('image', formData.image);
+
+        axios.post('https://troto.aninyan.com/articles', payload, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+            .then(() => {
+                toast.success("Artikel berhasil ditambahkan!", { autoClose: 3000 });
+                setShowModal(false);
+                setFormData({ title: '', description: '', image: '' });
+                fetchData();
+            })
+            .catch((error) => {
+                console.error(error);
+                toast.error(error.response?.data?.message || "Gagal menambahkan artikel", {
+                    autoClose: 3000,
+                });
+            })
+            .finally(() => {
+                setLoadingSubmit(false);
+            });
+    };
+
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -68,6 +124,7 @@ const Article = () => {
             fetchData(pagination.current_page + 1, articlesSearch);
         }
     };
+
     if (loading) return <Loading />;
 
     return (
@@ -93,10 +150,14 @@ const Article = () => {
                                     className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 w-80"
                                 />
                             </div>
-                            <button className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-600 transition-all duration-200">
+                            <button
+                                onClick={() => setShowModal(true)}
+                                className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-600 transition-all duration-200"
+                            >
                                 <FontAwesomeIcon icon={faPlus} className="mr-2" />
                                 Tambah Artikel
                             </button>
+
                         </div>
                     </div>
                 </div>
@@ -169,6 +230,78 @@ const Article = () => {
                     </div>
                 </div>
             </div>
+
+            {showModal && (
+                <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+                    <div className="bg-white p-8 rounded-2xl w-full max-w-3xl shadow-xl space-y-6">
+                        <h3 className="text-2xl font-bold text-gray-800">Tambah Artikel</h3>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Judul</label>
+                                <input
+                                    type="text"
+                                    name="title"
+                                    placeholder="Judul artikel"
+                                    value={formData.title}
+                                    onChange={handleChange}
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi / Isi Artikel</label>
+                                <textarea
+                                    name="description"
+                                    placeholder="Isi artikel..."
+                                    value={formData.description}
+                                    onChange={handleChange}
+                                    rows={10}
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 resize-none focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Gambar</label>
+                                <input
+                                    type="file"
+                                    name="image"
+                                    accept="image/*"
+                                    onChange={handleChange}
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-4">
+                            {loadingSubmit ? (
+                                <div className="relative w-6 h-6">
+                                    <div className="absolute inset-0 border-4 border-[#FFC100] border-t-transparent rounded-full animate-spin"></div>
+                                </div>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={() => setShowModal(false)}
+                                        className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button
+                                        onClick={handleSubmit}
+                                        className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm"
+                                    >
+                                        Simpan
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <ToastContainer
+                className="absolute top-5 right-5"
+            />
         </div>
     );
 };
