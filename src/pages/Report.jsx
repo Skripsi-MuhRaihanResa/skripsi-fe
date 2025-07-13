@@ -11,6 +11,7 @@ import {
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import Loading from '../components/Loading';
+import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -18,6 +19,7 @@ const Report = () => {
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [reportsSearch, setReportsSearch] = useState('');
+    const navigate = useNavigate();
 
     const [pagination, setPagination] = useState({
         current_page: 1,
@@ -144,7 +146,11 @@ const Report = () => {
                                                     </button>
                                                 </>
                                             )}
-                                            <button className="p-2 bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-lg transition" title="Lihat Detail">
+                                            <button
+                                                onClick={() => navigate(`/reports/${report.id}`)}
+                                                className="p-2 bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-lg transition"
+                                                title="Lihat Detail"
+                                            >
                                                 <FontAwesomeIcon icon={faEye} />
                                             </button>
                                         </div>
