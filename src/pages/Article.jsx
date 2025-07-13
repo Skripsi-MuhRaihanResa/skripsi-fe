@@ -21,6 +21,9 @@ const Article = () => {
     const [loading, setLoading] = useState(true);
     const [loadingSubmit, setLoadingSubmit] = useState(false);
     const [articlesSearch, setArticlesSearch] = useState('');
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [articleDetail, setArticleDetail] = useState(null);
+    const [loadingDetail, setLoadingDetail] = useState(false);
     const [pagination, setPagination] = useState({
         current_page: 1,
         last_page: 1,
@@ -141,6 +144,30 @@ const Article = () => {
         });
     };
 
+    const handleViewDetail = (id) => {
+        setLoadingDetail(true);
+        const token = Cookies.get('token');
+
+        axios.get(`https://troto.aninyan.com/articles/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then((res) => {
+                setArticleDetail(res.data.data);
+                setShowDetailModal(true);
+            })
+            .catch((error) => {
+                console.error(error);
+                toast.error(error.response?.data?.message || 'Gagal mengambil detail artikel', {
+                    autoClose: 3000,
+                });
+            })
+            .finally(() => {
+                setLoadingDetail(false);
+            });
+    };
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -218,6 +245,7 @@ const Article = () => {
                                             <button
                                                 className="p-2 bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-lg transition"
                                                 title="Lihat Detail"
+                                                onClick={() => handleViewDetail(article.id)}
                                             >
                                                 <FontAwesomeIcon icon={faEye} />
                                             </button>
@@ -321,6 +349,35 @@ const Article = () => {
                                     </button>
                                 </>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showDetailModal && articleDetail && (
+                <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+                    <div className="bg-white p-8 rounded-2xl w-full max-w-3xl shadow-xl space-y-6 overflow-y-auto max-h-[90vh]">
+                        <h3 className="text-2xl font-bold text-gray-800">{articleDetail.title}</h3>
+
+                        {articleDetail.image && (
+                            <img
+                                src={articleDetail.image}
+                                alt="Gambar Artikel"
+                                className="w-full h-auto rounded-lg object-cover"
+                            />
+                        )}
+
+                        <p className="text-gray-700 whitespace-pre-line">
+                            {articleDetail.description}
+                        </p>
+
+                        <div className="flex justify-end pt-4">
+                            <button
+                                onClick={() => setShowDetailModal(false)}
+                                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm"
+                            >
+                                Tutup
+                            </button>
                         </div>
                     </div>
                 </div>
