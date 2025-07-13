@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faEdit,
@@ -9,15 +9,66 @@ import {
     faChevronLeft,
     faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
+import Loading from '../components/Loading';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import Swal from 'sweetalert2';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Article = () => {
-    const articles = [
-        { id: 1, title: 'Pentingnya Perawatan Trotoar di Perkotaan' },
-        { id: 2, title: 'Solusi Trotoar Rusak untuk Kota Ramah Pejalan Kaki' },
-        { id: 3, title: 'Inovasi Material untuk Trotoar Tahan Lama' },
-        { id: 4, title: 'Cara Pemerintah Menangani Kerusakan Trotoar' },
-        { id: 5, title: 'Peran Warga dalam Melaporkan Trotoar Rusak' },
-    ];
+    const [articles, setArticles] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [articlesSearch, setArticlesSearch] = useState('');
+    const [pagination, setPagination] = useState({
+        current_page: 1,
+        last_page: 1,
+        total_data: 0
+    });
+
+    const fetchData = (page = 1, search = '') => {
+        setLoading(true);
+        const token = Cookies.get('token');
+
+        axios
+            .get(`https://troto.aninyan.com/articles?page=${page}&search=${search}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then((res) => {
+                setArticles(res.data.data);
+                setPagination(res.data.pagination);
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                toast.error(error.response?.data?.message || "Gagal memuat artikel", {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: true,
+                });
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const handlePrev = () => {
+        if (pagination.current_page > 1) {
+            fetchData(pagination.current_page - 1, articlesSearch);
+        }
+    };
+
+    const handleNext = () => {
+        if (pagination.current_page < pagination.last_page) {
+            fetchData(pagination.current_page + 1, articlesSearch);
+        }
+    };
+    if (loading) return <Loading />;
 
     return (
         <div className="flex-1 p-8">
@@ -26,7 +77,6 @@ const Article = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-2xl font-bold text-gray-900">Artikel</h2>
-                            <p className="text-gray-500 mt-1">Kelola informasi artikel yang tersedia di sistem</p>
                         </div>
                         <div className="flex gap-3 items-center">
                             <div className="relative">
@@ -34,6 +84,12 @@ const Article = () => {
                                 <input
                                     type="text"
                                     placeholder="Cari artikel..."
+                                    onChange={(e) => setArticlesSearch(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            fetchData(1, articlesSearch);
+                                        }
+                                    }}
                                     className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 w-80"
                                 />
                             </div>
@@ -54,7 +110,7 @@ const Article = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-100">
-                            {articles.map((article) => (
+                            {articles.length > 0 ? articles.map((article) => (
                                 <tr key={article.id} className="hover:bg-gray-50 transition-colors duration-150">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{article.title}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -80,18 +136,34 @@ const Article = () => {
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
+                            )) : (
+                                <tr>
+                                    <td colSpan="5" className="text-center text-sm text-gray-500 py-8">
+                                        Tidak ada data ditemukan.
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
 
-                <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-center">
+                <div className="px-6 py-4 border-t border-gray-100 flex justify-center">
                     <div className="flex items-center space-x-2">
-                        <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-150">
+                        <button
+                            onClick={handlePrev}
+                            disabled={pagination.current_page === 1}
+                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50"
+                        >
                             <FontAwesomeIcon icon={faChevronLeft} />
                         </button>
-                        <span className="px-3 py-1 bg-orange-500 text-white rounded-lg text-sm font-medium">1</span>
-                        <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-150">
+                        <span className="px-3 py-1 bg-orange-500 text-white rounded-lg text-sm font-medium">
+                            {pagination.current_page}
+                        </span>
+                        <button
+                            onClick={handleNext}
+                            disabled={pagination.current_page === pagination.last_page}
+                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50"
+                        >
                             <FontAwesomeIcon icon={faChevronRight} />
                         </button>
                     </div>

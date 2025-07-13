@@ -13,7 +13,7 @@ const User = () => {
     const [usersSearch, setUsersSearch] = useState('');
     const [users, setUsers] = useState([]);
 
-    const [usersPagination, setUsersPagination] = useState({
+    const [pagination, setPagination] = useState({
         current_page: 1,
         last_page: 1,
         total_data: 0
@@ -31,7 +31,7 @@ const User = () => {
             })
             .then((res) => {
                 setUsers(res.data.data);
-                setUsersPagination(res.data.pagination);
+                setPagination(res.data.pagination);
             })
             .catch((error) => {
                 console.error("Error:", error);
@@ -194,17 +194,17 @@ const User = () => {
                     <div className="flex items-center space-x-2">
                         <button
                             onClick={handlePrevPage}
-                            disabled={usersPagination.current_page === 1}
+                            disabled={pagination.current_page === 1}
                             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50"
                         >
                             <FontAwesomeIcon icon={faChevronLeft} />
                         </button>
                         <span className="px-3 py-1 bg-orange-500 text-white rounded-lg text-sm font-medium">
-                            {usersPagination.current_page}
+                            {pagination.current_page}
                         </span>
                         <button
                             onClick={handleNextPage}
-                            disabled={usersPagination.current_page === usersPagination.last_page}
+                            disabled={pagination.current_page === pagination.last_page}
                             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-50"
                         >
                             <FontAwesomeIcon icon={faChevronRight} />
