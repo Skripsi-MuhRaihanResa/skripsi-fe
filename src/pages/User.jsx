@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faChevronLeft, faChevronRight, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { toast } from 'react-toastify';
 import Loading from '../components/Loading';
 import Cookies from 'js-cookie';
 import Swal from 'sweetalert2';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const User = () => {
     const [loading, setLoading] = useState(true);
@@ -211,6 +212,10 @@ const User = () => {
                     </div>
                 </div>
             </div>
+
+            <ToastContainer
+                className="absolute top-5 right-5"
+            />
         </div>
     );
 };
