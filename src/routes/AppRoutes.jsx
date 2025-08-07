@@ -13,11 +13,20 @@ import Login from '../pages/login';
 import NotFound from '../pages/NotFound';
 
 const Layout = ({ children }) => (
-    <div className="flex flex-col h-screen">
-        <Header />
-        <div className="flex flex-1">
+    <div className="relative w-screen h-screen overflow-hidden">
+        {/* Header tetap di atas */}
+        <div className="absolute top-0 left-0 right-0 h-16 z-50">
+            <Header />
+        </div>
+
+        {/* Sidebar tetap di kiri, di bawah header */}
+        <div className="absolute top-16 left-0 bottom-0 w-64 z-40">
             <Navigation />
-            <div className="flex-1 overflow-auto p-6 bg-gray-50">{children}</div>
+        </div>
+
+        {/* Konten yang bisa discroll */}
+        <div className="absolute top-16 left-24 right-0 bottom-0 overflow-auto z-30">
+            {children}
         </div>
     </div>
 );

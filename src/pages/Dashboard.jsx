@@ -13,6 +13,8 @@ import {
 import Cookies from 'js-cookie';
 import Loading from '../components/Loading';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Dashboard = () => {
     const [loading, setLoading] = useState(true);
@@ -49,8 +51,12 @@ const Dashboard = () => {
 
             })
             .catch(error => {
-                console.error('Error fetching data:', error);
-                // Bisa tampilkan notifikasi error di sini
+                console.error(error);
+                toast.error(error.response?.data?.message || "error", {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: true,
+                });
             })
             .finally(() => {
                 setLoading(false);
@@ -88,7 +94,7 @@ const Dashboard = () => {
     if (loading) return <Loading />;
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="text-5xl font-extrabold mb-10">
@@ -286,6 +292,10 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
+
+            <ToastContainer
+                className="absolute top-5 right-5"
+            />
         </div>
     );
 };
