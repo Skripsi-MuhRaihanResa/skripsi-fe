@@ -1,279 +1,288 @@
 import React, { useState, useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+    faUsers,
+    faFileAlt,
+    faExclamationTriangle,
+    faClock,
+    faMapMarkerAlt,
+    faThumbsUp,
+    faCalendar
+} from '@fortawesome/free-solid-svg-icons';
+import Cookies from 'js-cookie';
+import Loading from '../components/Loading';
+import axios from 'axios';
 
 const Dashboard = () => {
-    const [currentTime, setCurrentTime] = useState(new Date());
+    const [loading, setLoading] = useState(true);
+
+    // Separate state for each data type
+    const [reports, setReports] = useState({ data: [], count: 0 });
+    const [users, setUsers] = useState({ data: [], count: 0 });
+    const [articles, setArticles] = useState({ data: [], count: 0 });
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 1000);
-        return () => clearInterval(timer);
+        const token = Cookies.get('token');
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        };
+
+        Promise.all([
+            axios.get('https://troto.aninyan.com/reports', config),
+            axios.get('https://troto.aninyan.com/users', config),
+            axios.get('https://troto.aninyan.com/articles', config)
+        ])
+            .then(([reportsRes, usersRes, articlesRes]) => {
+                setReports(reportsRes.data);
+                setUsers(usersRes.data);
+                setArticles(articlesRes.data);
+
+                console.log('📊 Reports - count:', reportsRes.data.count, '| data.length:', reportsRes.data.data.length);
+                console.log('👤 Users   - count:', usersRes.data.count, '| data.length:', usersRes.data.data.length);
+                console.log('📰 Articles - count:', articlesRes.data.count, '| data.length:', articlesRes.data.data.length);
+
+
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                // Bisa tampilkan notifikasi error di sini
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, []);
 
-    const FeatureCard = ({ icon, title, description, color, bgColor }) => (
-        <div className={`relative overflow-hidden ${bgColor} rounded-2xl shadow-lg p-8 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group cursor-pointer`}>
-            <div className="absolute top-0 right-0 w-16 h-16 bg-white bg-opacity-20 rounded-full -translate-y-8 translate-x-8 group-hover:scale-125 transition-transform duration-300"></div>
-            <div className="relative z-10">
-                <div className="mb-6">
-                    <div className={`inline-flex p-4 rounded-2xl ${color} bg-opacity-20`}>
-                        <i className={`${icon} text-3xl ${color}`}></i>
-                    </div>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-3">{title}</h3>
-                <p className="text-gray-600 leading-relaxed">{description}</p>
-            </div>
-        </div>
-    );
+    // Calculate statistics
+    const getReportStats = () => {
+        const reportsData = reports.data || [];
+        const pending = reportsData.filter(r => r.status === 'Pending').length;
+        const approved = reportsData.filter(r => r.status === 'Approved').length;
+        const rejected = reportsData.filter(r => r.status === 'Rejected').length;
+        const heavyDamage = reportsData.filter(r => r.status_damage === 'Heavy Damaged').length;
+        const lightDamage = reportsData.filter(r => r.status_damage === 'Light Damaged').length;
+        const good = reportsData.filter(r => r.status_damage === 'Good').length;
 
-    const QuickActionButton = ({ icon, label, color, bgColor, onClick }) => (
-        <button
-            onClick={onClick}
-            className={`${bgColor} rounded-2xl p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 group w-full text-left`}
-        >
-            <div className="flex items-center space-x-4">
-                <div className={`p-3 rounded-xl ${color} bg-opacity-20`}>
-                    <i className={`${icon} text-2xl ${color} group-hover:scale-110 transition-transform duration-200`}></i>
-                </div>
-                <div>
-                    <h4 className="font-semibold text-gray-800">{label}</h4>
-                    <p className="text-sm text-gray-600">Klik untuk mengakses</p>
-                </div>
-            </div>
-        </button>
-    );
-
-    const formatTime = (date) => {
-        return date.toLocaleTimeString('id-ID', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
+        return { pending, approved, rejected, heavyDamage, lightDamage, good };
     };
 
-    const formatDate = (date) => {
-        return date.toLocaleDateString('id-ID', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    };
+    const stats = getReportStats();
+
+    // Data for charts
+    const statusData = [
+        { name: 'Pending', value: stats.pending, color: '#f59e0b' },
+        { name: 'Diterima', value: stats.approved, color: '#10b981' },
+        { name: 'Ditolak', value: stats.rejected, color: '#ff0022ff' }
+    ];
+
+    const damageData = [
+        { name: 'Heavy Damage', count: stats.heavyDamage },
+        { name: 'Light Damage', count: stats.lightDamage },
+        { name: 'Good', count: stats.good }
+    ];
+
+    if (loading) return <Loading />;
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header Section */}
-            <div className="relative overflow-hidden px-8 py-16 shadow-xl" style={{
-                background: 'linear-gradient(135deg, #fb923c 0%, #f97316 50%, #ea580c 100%)'
-            }}>
-                {/* Decorative Elements */}
-                <div className="absolute top-0 right-0 w-72 h-72 rounded-full opacity-10" style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    transform: 'translate(144px, -144px)'
-                }}></div>
-                <div className="absolute bottom-0 left-0 w-56 h-56 rounded-full opacity-10" style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    transform: 'translate(-112px, 112px)'
-                }}></div>
+        <div className="min-h-screen bg-gray-50 p-6">
+            <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="text-5xl font-extrabold mb-10">
+                    <span className="text-orange-500">Troto</span>
+                    <span className="text-black">Track</span>
+                </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto">
-                    <div className="flex items-center justify-between mb-8">
-                        <div className="flex items-center space-x-6">
-                            <div className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-2xl" style={{
-                                background: 'rgba(255, 255, 255, 0.25)',
-                                backdropFilter: 'blur(20px)',
-                                border: '1px solid rgba(255, 255, 255, 0.3)'
-                            }}>
-                                <span className="text-white text-3xl font-bold">T</span>
-                            </div>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-5xl font-extrabold mb-2">
-                                    <span className="text-white">Troto</span>
-                                    <span className="text-orange-100">Track</span>
-                                </div>
-                                <p className="text-orange-100 text-lg">Admin Dashboard</p>
+                                <p className="text-sm font-medium text-gray-600">Total Laporan</p>
+                                <p className="text-3xl font-bold text-gray-900">{reports.count}</p>
+                            </div>
+                            <div className="bg-blue-100 p-3 rounded-full">
+                                <FontAwesomeIcon icon={faExclamationTriangle} className="h-6 w-6 text-blue-600" />
                             </div>
                         </div>
-                        <div className="text-right text-white">
-                            <div className="text-3xl font-bold mb-1">{formatTime(currentTime)}</div>
-                            <div className="text-orange-100">{formatDate(currentTime)}</div>
-                        </div>
                     </div>
 
-                    <div className="rounded-2xl p-8 max-w-4xl" style={{
-                        background: 'rgba(255, 255, 255, 0.15)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(255, 255, 255, 0.3)'
-                    }}>
-                        <div className="flex items-center mb-4">
-                            <i className="fas fa-sparkles text-2xl text-white mr-3"></i>
-                            <h1 className="text-2xl font-bold text-white">Selamat Datang, Admin!</h1>
-                        </div>
-                        <p className="text-white text-lg leading-relaxed">
-                            Kelola sistem TrotoTrack dengan mudah. Pantau laporan trotoar,
-                            atur konten artikel, dan kelola pengguna dalam satu dashboard yang terintegrasi.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-8 py-12">
-                {/* Feature Cards */}
-                <div className="mb-16">
-                    <div className="text-center mb-12">
-                        <h2 className="text-4xl font-bold text-gray-800 mb-4">Fitur Utama</h2>
-                        <p className="text-xl text-gray-600">Kelola semua aspek TrotoTrack dengan mudah</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <FeatureCard
-                            icon="fas fa-newspaper"
-                            title="Manajemen Artikel"
-                            description="Buat, edit, dan kelola artikel informatif tentang trotoar dan infrastruktur kota"
-                            color="text-blue-600"
-                            bgColor="bg-gradient-to-br from-blue-50 to-blue-100"
-                        />
-                        <FeatureCard
-                            icon="fas fa-exclamation-triangle"
-                            title="Laporan Trotoar"
-                            description="Pantau laporan kerusakan trotoar dari masyarakat dan kelola tindak lanjutnya"
-                            color="text-red-600"
-                            bgColor="bg-gradient-to-br from-red-50 to-red-100"
-                        />
-                        <FeatureCard
-                            icon="fas fa-users-cog"
-                            title="Manajemen User"
-                            description="Kelola pengguna sistem, atur peran, dan pantau aktivitas pengguna"
-                            color="text-purple-600"
-                            bgColor="bg-gradient-to-br from-purple-50 to-purple-100"
-                        />
-                    </div>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="mb-16">
-                    <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
-                        <div className="flex items-center mb-8">
-                            <div className="p-3 rounded-xl bg-orange-100 mr-4">
-                                <i className="fas fa-bolt text-2xl text-orange-600"></i>
-                            </div>
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <div className="flex items-center justify-between">
                             <div>
-                                <h3 className="text-2xl font-bold text-gray-800">Aksi Cepat</h3>
-                                <p className="text-gray-600">Akses langsung ke fitur yang sering digunakan</p>
+                                <p className="text-sm font-medium text-gray-600">Total User</p>
+                                <p className="text-3xl font-bold text-gray-900">{users.count}</p>
+                            </div>
+                            <div className="bg-green-100 p-3 rounded-full">
+                                <FontAwesomeIcon icon={faUsers} className="h-6 w-6 text-green-600" />
                             </div>
                         </div>
+                    </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <QuickActionButton
-                                icon="fas fa-plus-circle"
-                                label="Buat Artikel Baru"
-                                color="text-blue-600"
-                                bgColor="bg-blue-50"
-                                onClick={() => console.log('Navigasi ke buat artikel')}
-                            />
-                            <QuickActionButton
-                                icon="fas fa-list-alt"
-                                label="Lihat Semua Laporan"
-                                color="text-green-600"
-                                bgColor="bg-green-50"
-                                onClick={() => console.log('Navigasi ke laporan')}
-                            />
-                            <QuickActionButton
-                                icon="fas fa-user-plus"
-                                label="Tambah Pengguna"
-                                color="text-purple-600"
-                                bgColor="bg-purple-50"
-                                onClick={() => console.log('Navigasi ke tambah user')}
-                            />
-                            <QuickActionButton
-                                icon="fas fa-chart-line"
-                                label="Lihat Statistik"
-                                color="text-orange-600"
-                                bgColor="bg-orange-50"
-                                onClick={() => console.log('Navigasi ke statistik')}
-                            />
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Total Artikel</p>
+                                <p className="text-3xl font-bold text-gray-900">{articles.count}</p>
+                            </div>
+                            <div className="bg-purple-100 p-3 rounded-full">
+                                <FontAwesomeIcon icon={faFileAlt} className="h-6 w-6 text-purple-600" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Laporan Pending</p>
+                                <p className="text-3xl font-bold text-yellow-600">{stats.pending}</p>
+                            </div>
+                            <div className="bg-yellow-100 p-3 rounded-full">
+                                <FontAwesomeIcon icon={faClock} className="h-6 w-6 text-yellow-600" />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Info Cards */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Getting Started */}
-                    <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
-                        <div className="flex items-center mb-6">
-                            <div className="p-3 rounded-xl bg-green-100 mr-4">
-                                <i className="fas fa-play-circle text-2xl text-green-600"></i>
-                            </div>
-                            <h3 className="text-2xl font-bold text-gray-800">Mulai Dari Sini</h3>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="flex items-start space-x-3">
-                                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                                    <span className="text-orange-600 font-bold text-sm">1</span>
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-800">Kelola Artikel</h4>
-                                    <p className="text-sm text-gray-600">Buat konten edukatif untuk pengguna</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start space-x-3">
-                                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                                    <span className="text-orange-600 font-bold text-sm">2</span>
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-800">Pantau Laporan</h4>
-                                    <p className="text-sm text-gray-600">Respons cepat terhadap laporan masyarakat</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-start space-x-3">
-                                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                                    <span className="text-orange-600 font-bold text-sm">3</span>
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-800">Analisis Data</h4>
-                                    <p className="text-sm text-gray-600">Gunakan insights untuk perbaikan sistem</p>
-                                </div>
-                            </div>
-                        </div>
+                {/* Charts Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    {/* Status Distribution */}
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribusi Status Laporan</h3>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <PieChart>
+                                <Pie
+                                    data={statusData}
+                                    cx="50%"
+                                    cy="50%"
+                                    labelLine={false}
+                                    label={({ name, value }) => `${name}: ${value}`}
+                                    outerRadius={80}
+                                    fill="#8884d8"
+                                    dataKey="value"
+                                >
+                                    {statusData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                            </PieChart>
+                        </ResponsiveContainer>
                     </div>
 
-                    {/* Tips & Tricks */}
-                    <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
-                        <div className="flex items-center mb-6">
-                            <div className="p-3 rounded-xl bg-yellow-100 mr-4">
-                                <i className="fas fa-lightbulb text-2xl text-yellow-600"></i>
-                            </div>
-                            <h3 className="text-2xl font-bold text-gray-800">Aturan</h3>
-                        </div>
+                    {/* Damage Level */}
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Distribusi Tingkat Kerusakan</h3>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={damageData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" />
+                                <YAxis />
+                                <Tooltip />
+                                <Bar dataKey="count" fill="#3b82f6" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
 
-                        <div className="space-y-4">
-                            <div className="p-4 bg-gray-50 rounded-xl">
-                                <div className="flex items-center mb-2">
-                                    <i className="fas fa-star text-orange-500 mr-2"></i>
-                                    <h4 className="font-semibold text-gray-800">Responsif & Cepat</h4>
-                                </div>
-                                <p className="text-sm text-gray-600">Respons laporan dalam waktu 24 jam untuk kepuasan pengguna</p>
-                            </div>
+                {/* Recent Reports */}
+                <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Laporan Terbaru</h3>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Lokasi
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Kategori
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Upvote
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Tanggal
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {reports.data.slice(0, 5).map((report) => (
+                                    <tr key={report.id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <i className="fas fa-map-marker-alt text-gray-400 mr-2"></i>
+                                                <span className="text-sm text-gray-900 capitalize">{report.location}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                                ${report.status === 'Approved' && 'bg-green-100 text-green-600'}
+                                                ${report.status === 'Rejected' && 'bg-red-100 text-red-600'}
+                                                ${report.status === 'Pending' && 'bg-yellow-100 text-yellow-600'}
+                                            `}>
+                                                {report.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                                ${report.status_damage === 'Heavy Damaged' && 'bg-red-100 text-red-600'}
+                                                ${report.status_damage === 'Light Damaged' && 'bg-yellow-100 text-yellow-600'}
+                                                ${report.status_damage === 'Good' && 'bg-green-100 text-green-600'}
+                                            `}>
+                                                {report.status_damage}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <i className="fas fa-thumbs-up text-gray-400 mr-1"></i>
+                                                <span className="text-sm text-gray-900">{report.like}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <i className="fas fa-calendar text-gray-400 mr-2"></i>
+                                                <span className="text-sm text-gray-900">
+                                                    {new Date(report.created_at).toLocaleDateString('id-ID', {
+                                                        day: '2-digit',
+                                                        month: 'long',
+                                                        year: 'numeric',
+                                                    })}
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-                            <div className="p-4 bg-gray-50 rounded-xl">
-                                <div className="flex items-center mb-2">
-                                    <i className="fas fa-shield-alt text-blue-500 mr-2"></i>
-                                    <h4 className="font-semibold text-gray-800">Keamanan Data</h4>
+                {/* Recent Articles */}
+                <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Artikel Terbaru</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {articles.data.slice(0, 6).map((article) => (
+                            <div key={article.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <img
+                                    src={article.image}
+                                    alt={article.title}
+                                    className="w-full h-32 object-cover rounded-md mb-3"
+                                />
+                                <h4 className="font-medium text-gray-900 mb-2 line-clamp-2">{article.title}</h4>
+                                <p className="text-sm text-gray-600 mb-2 line-clamp-3">{article.description}</p>
+                                <div className="flex items-center text-xs text-gray-500">
+                                    <i className="fas fa-calendar mr-1"></i>
+                                    {new Date(article.created_at).toLocaleDateString('id-ID')}
                                 </div>
-                                <p className="text-sm text-gray-600">Pastikan data pengguna selalu terlindungi dengan baik</p>
                             </div>
-
-                            <div className="p-4 bg-gray-50 rounded-xl">
-                                <div className="flex items-center mb-2">
-                                    <i className="fas fa-chart-pie text-green-500 mr-2"></i>
-                                    <h4 className="font-semibold text-gray-800">Monitor Berkala</h4>
-                                </div>
-                                <p className="text-sm text-gray-600">Lakukan evaluasi rutin untuk meningkatkan kualitas layanan</p>
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </div>
