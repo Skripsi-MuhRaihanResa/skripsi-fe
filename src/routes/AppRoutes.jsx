@@ -13,6 +13,7 @@ import Login from '../pages/Login';
 import NotFound from '../pages/NotFound';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ArticleDetail from '../pages/ArticleDetail';
 
 const Layout = ({ children }) => (
     <div className="relative w-screen h-screen overflow-hidden">
@@ -94,6 +95,14 @@ const AppRoutes = () => {
                 element={
                     <Layout>
                         <Article />
+                    </Layout>
+                }
+            />
+            <Route
+                path="/article/:id"
+                element={
+                    <Layout>
+                        <ArticleDetail />
                     </Layout>
                 }
             />

@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Loading from '../components/Loading';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkerAlt, faFileAlt, faExclamationTriangle, faThumbsUp, faMap } from '@fortawesome/free-solid-svg-icons';
+import { useParams, useNavigate } from "react-router-dom";
+import { faMapMarkerAlt, faArrowLeft, faFileAlt, faExclamationTriangle, faThumbsUp, faMap, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
 
 const ReportDetail = () => {
     const { id } = useParams();
     const [report, setReport] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const token = Cookies.get("token");
@@ -53,6 +54,14 @@ const ReportDetail = () => {
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="max-w-4xl mx-auto px-6">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="mb-6 flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-md shadow-sm text-gray-700 hover:bg-gray-50 transition"
+                    aria-label="Kembali"
+                >
+                    <FontAwesomeIcon icon={faArrowLeft} />
+                    Kembali
+                </button>
                 <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
                     <div className="flex items-center justify-between">
                         <h1 className="text-3xl font-bold text-gray-900">Detail Laporan</h1>
@@ -158,18 +167,47 @@ const ReportDetail = () => {
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-xl shadow-sm p-6">
+                        <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Aksi</h3>
-                            <a
-                                href={`https://www.google.com/maps/search/?api=1&query=${report.latitude},${report.longitude}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors duration-200"
-                            >
-                                <FontAwesomeIcon icon={faMap} />
-                                Lihat Lokasi di Maps
-                            </a>
+                            {report.status === 'Pending' ? (
+                                <>
+                                    <button
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg transition-colors duration-200"
+                                    >
+                                        <FontAwesomeIcon icon={faCheck} />
+                                        Setuju
+                                    </button>
+                                    <button
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors duration-200"
+                                    >
+                                        <FontAwesomeIcon icon={faXmark} />
+                                        Tolak
+                                    </button>
+                                </>
+                            ) : (
+                                <p className="text-gray-500 italic">Tidak ada aksi yang dapat dilakukan. Status sudah {report.status.toLowerCase()}.</p>
+                            )}
                         </div>
+                    </div>
+                </div>
+
+                {/* bagian peta di bawah */}
+                <div className="bg-white rounded-xl shadow-sm p-6 mt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Lokasi di Peta</h3>
+                    <div className="w-full h-80 rounded overflow-hidden shadow-inner">
+                        <iframe
+                            title="Peta Lokasi"
+                            width="100%"
+                            height="100%"
+                            frameBorder="0"
+                            scrolling="no"
+                            marginHeight="0"
+                            marginWidth="0"
+                            src={`https://maps.google.com/maps?q=${report.latitude},${report.longitude}&z=15&output=embed`}
+                            allowFullScreen
+                            loading="lazy"
+                            style={{ borderRadius: "0.5rem" }}
+                        />
                     </div>
                 </div>
             </div>
