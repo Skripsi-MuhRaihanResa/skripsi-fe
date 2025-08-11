@@ -13,13 +13,10 @@ import {
 import Cookies from 'js-cookie';
 import Loading from '../components/Loading';
 import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 const Dashboard = () => {
     const [loading, setLoading] = useState(true);
 
-    // Separate state for each data type
     const [reports, setReports] = useState({ data: [], count: 0 });
     const [users, setUsers] = useState({ data: [], count: 0 });
     const [articles, setArticles] = useState({ data: [], count: 0 });
@@ -63,7 +60,6 @@ const Dashboard = () => {
             });
     }, []);
 
-    // Calculate statistics
     const getReportStats = () => {
         const reportsData = reports.data || [];
         const pending = reportsData.filter(r => r.status === 'Pending').length;
@@ -78,7 +74,6 @@ const Dashboard = () => {
 
     const stats = getReportStats();
 
-    // Data for charts
     const statusData = [
         { name: 'Pending', value: stats.pending, color: '#f59e0b' },
         { name: 'Diterima', value: stats.approved, color: '#10b981' },
@@ -94,15 +89,13 @@ const Dashboard = () => {
     if (loading) return <Loading />;
 
     return (
-        <div className="min-h-screen p-6">
+        <div className="min-h-screen p-6 mt-10">
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
                 <div className="text-5xl font-extrabold mb-10">
                     <span className="text-orange-500">Troto</span>
                     <span className="text-black">Track</span>
                 </div>
 
-                {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <div className="flex items-center justify-between">
@@ -153,7 +146,6 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Charts Row */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     {/* Status Distribution */}
                     <div className="bg-white rounded-lg shadow-md p-6">
@@ -292,10 +284,6 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
-
-            <ToastContainer
-                className="absolute top-5 right-5"
-            />
         </div>
     );
 };
