@@ -11,20 +11,26 @@ import ReportDetail from '../pages/ReportDetail';
 import Article from '../pages/Article';
 import Login from '../pages/Login';
 import NotFound from '../pages/NotFound';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Layout = ({ children }) => (
     <div className="relative w-screen h-screen overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-16 z-50">
+        <div className="absolute top-0 left-0 right-0 h-16 z-20">
             <Header />
         </div>
 
-        <div className="absolute top-16 left-0 bottom-0 w-64 z-40">
+        <div className="absolute top-16 left-0 bottom-0 w-64 z-10">
             <Navigation />
         </div>
 
-        <div className="absolute top-16 left-24 right-0 bottom-0 overflow-auto z-30">
+        <div className="absolute top-16 left-24 right-0 bottom-0 overflow-auto z-5">
             {children}
         </div>
+
+        <ToastContainer
+            className="absolute top-5 right-5 z-40"
+        />
     </div>
 );
 

@@ -292,10 +292,6 @@ const Report = () => {
                     </div>
                 </div>
             </div>
-
-            <ToastContainer
-                className="absolute top-5 right-5"
-            />
         </div>
     );
 };
