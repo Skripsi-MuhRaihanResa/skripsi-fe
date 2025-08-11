@@ -2,9 +2,9 @@ import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Cookies from 'js-cookie';
 
-import Dashboard from '../pages/dashboard';
-import Header from '../components/header';
-import Navigation from '../components/navigation';
+import Dashboard from '../pages/Dashboard';
+import Header from '../components/Header';
+import Navigation from '../components/Navigation';
 import User from '../pages/User';
 import Report from '../pages/Report';
 import ReportDetail from '../pages/ReportDetail';
@@ -14,17 +14,14 @@ import NotFound from '../pages/NotFound';
 
 const Layout = ({ children }) => (
     <div className="relative w-screen h-screen overflow-hidden">
-        {/* Header tetap di atas */}
         <div className="absolute top-0 left-0 right-0 h-16 z-50">
             <Header />
         </div>
 
-        {/* Sidebar tetap di kiri, di bawah header */}
         <div className="absolute top-16 left-0 bottom-0 w-64 z-40">
             <Navigation />
         </div>
 
-        {/* Konten yang bisa discroll */}
         <div className="absolute top-16 left-24 right-0 bottom-0 overflow-auto z-30">
             {children}
         </div>

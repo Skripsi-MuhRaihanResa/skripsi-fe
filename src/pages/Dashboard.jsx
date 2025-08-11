@@ -5,10 +5,7 @@ import {
     faUsers,
     faFileAlt,
     faExclamationTriangle,
-    faClock,
-    faMapMarkerAlt,
-    faThumbsUp,
-    faCalendar
+    faClock
 } from '@fortawesome/free-solid-svg-icons';
 import Cookies from 'js-cookie';
 import Loading from '../components/Loading';
