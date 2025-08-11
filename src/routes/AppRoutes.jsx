@@ -9,7 +9,7 @@ import User from '../pages/User';
 import Report from '../pages/Report';
 import ReportDetail from '../pages/ReportDetail';
 import Article from '../pages/Article';
-import Login from '../pages/login';
+import Login from '../pages/Login';
 import NotFound from '../pages/NotFound';
 
 const Layout = ({ children }) => (
